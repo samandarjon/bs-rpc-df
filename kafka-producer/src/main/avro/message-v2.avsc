@@ -1,0 +1,25 @@
+{
+  "namespace": "live.akbarov.kafkaproducer.avro",
+  "type": "record",
+  "name": "MessageV2",
+  "version": "2",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "content",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    },
+    {
+      "name": "priority",
+      "type": ["null", "string"],
+      "default": null
+    }
+  ]
+}
