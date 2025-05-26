@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "live.akbarov.grpcserver";
+option java_outer_classname = "MessageProto";
+service MessageService {
+  rpc doAction (Message) returns (Message);
+}
+message Message {
+  string message = 1;
+}
