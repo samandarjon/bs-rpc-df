@@ -4,14 +4,12 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import live.akbarov.grpcserver.Message;
 import live.akbarov.grpcserver.MessageServiceGrpc;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class GrpcClient {
-    private static final Logger logger = Logger.getLogger(GrpcClient.class.getName());
-
+@Slf4j
+public class GrpcClient implements AutoCloseable {
     private final ManagedChannel channel;
     private final MessageServiceGrpc.MessageServiceBlockingStub blockingStub;
 
@@ -30,24 +28,28 @@ public class GrpcClient {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
 
+    @Override
+    public void close() throws Exception {
+        shutdown();
+    }
+
     public void sendMessage(String text) {
-        logger.info("Sending message: " + text);
+        log.info("Sending message: {}", text);
         Message request = Message.newBuilder().setMessage(text).build();
         Message response;
         try {
             response = blockingStub.doAction(request);
-            logger.info("Response received: " + response.getMessage());
+            log.info("Response received: {}", response.getMessage());
         } catch (Exception e) {
-            logger.log(Level.WARNING, "RPC failed: {0}", e.getMessage());
+            log.error("RPC failed: {}", e.getMessage());
         }
     }
 
     public static void main(String[] args) throws Exception {
-        GrpcClient client = new GrpcClient("localhost", 8080);
-        try {
+        try (GrpcClient client = new GrpcClient("localhost", 8080)) {
             client.sendMessage("Ping");
-        }finally {
-            client.shutdown();
+        } catch (RuntimeException e) {
+            log.error("Unexpected error occupied: {}", e.getMessage());
         }
     }
 }
